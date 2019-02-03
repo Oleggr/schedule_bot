@@ -1,2 +1,2 @@
 # schedule_bot
-Telegram bot with my university schedule
+Special telegram bot which provide university schedule right to your phone 
