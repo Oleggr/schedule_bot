@@ -18,12 +18,25 @@ def get_html(url):
 def parse(html):
 
     soup = BeautifulSoup(html, features="html.parser")
+
+    # Before we'll find schedule
+    # we must find group name
+
+    header = soup.find('div', class_ = 'page-header')
+    print(header)
+    # name_of_group = header.find('h1').text
+    # print(name_of_group[11:])
+
+    # Find schedule
+
     data = soup.find('div', class_ = 'row')
     divs = data.find_all('tbody') 
 
+    # Counter need because of strange structure of schedule
+
     counter = 1
+
     for i in divs:
-        # print(i.tr.td.strong.text)
 
         # On the site schedule have 2 similar versions
         # which plased in the same table
@@ -48,7 +61,7 @@ def parse(html):
                     day_of_week = j.td.text
 
         ###----------------------
-                    day_schedule.day_of_week = day_of_week + '\n'
+                    # day_schedule.get_new_val_for_day_of_week(day_of_week + '\n')
 
                 elif counter1 == 1:
                     pass
@@ -58,7 +71,7 @@ def parse(html):
                     time_of_lesson = data_of_day[0].text
 
         ###-----------------------
-                    day_schedule.time_of_classes[counter1 - 2] = time_of_lesson + '\n'
+                    # day_schedule.time_of_classes[counter1 - 2] = time_of_lesson + '\n'
 
                     if 'colspan=' not in str(data_of_day):
 
@@ -75,7 +88,7 @@ def parse(html):
                             even_lesson = '---'
 
         ###-----------------------
-                        day_schedule.classes[counter1 - 2] = '  (чс) ' + odd_lesson + '\n   (зн) ' + even_lesson + '\n'
+                        # day_schedule.classes[counter1 - 2] = '  (чс) ' + odd_lesson + '\n   (зн) ' + even_lesson + '\n'
 
 
                     else:
@@ -83,15 +96,15 @@ def parse(html):
                         odd_lesson = even_lesson = data_of_day[1].text
 
         ###-----------------------
-                        day_schedule.classes[counter1 - 2] = '  ' + data_of_day[1].text + '\n'
+                        # day_schedule.classes[counter1 - 2] = '  ' + data_of_day[1].text + '\n'
 
-                # print(data_of_day)
+                print(data_of_day)
                 
-                print(
-                day_schedule.day_of_week,
-                day_schedule.time_of_classes[counter1 - 2],
-                day_schedule.classes[counter1 - 2],
-                )
+                # print(
+                # day_schedule.return_day_of_week(),
+                # day_schedule.time_of_classes[counter1 - 2],
+                # day_schedule.classes[counter1 - 2],
+                # )
 
                 week.append(day_schedule)
                 counter1 += 1
