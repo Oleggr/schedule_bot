@@ -1,14 +1,24 @@
 # Schedule parser
 
+import datetime
 
 import urllib.request
 from bs4 import BeautifulSoup
 import schedule_class as SC
 
 
-URL = 'https://students.bmstu.ru/schedule/62ee7ad2-a264-11e5-8179-005056960017'
-week = []
+# ИУ3-53 - перестал работать
+# URL = 'https://students.bmstu.ru/schedule/62ee7ad2-a264-11e5-8179-005056960017'
 
+
+# ИУ3-63
+# URL = 'https://students.bmstu.ru/schedule/62ee7b7c-a264-11e5-a475-005056960017'
+
+# ИУ7-63
+URL = 'https://students.bmstu.ru/schedule/62eca0d6-a264-11e5-84ad-005056960017'
+
+week = []
+DATA_FORMAT = '%Y'
 
 def get_html(url):
     response = urllib.request.urlopen(url)
@@ -22,97 +32,114 @@ def parse(html):
     # Before we'll find schedule
     # we must find group name
 
-    header = soup.find('div', class_ = 'page-header')
-    print(header)
-    # name_of_group = header.find('h1').text
-    # print(name_of_group[11:])
+    header = soup.find('div', class_ = "page-header")
+    # print(header)
+    name_of_group = header.find('h1').text[11:]
+    
+    b = datetime.datetime.now().strftime(DATA_FORMAT)
 
-    # Find schedule
+    filename = name_of_group + '.' + b + '.txt'
 
-    data = soup.find('div', class_ = 'row')
-    divs = data.find_all('tbody') 
+    with open (filename, 'w') as f:
+        
+        # Find schedule
 
-    # Counter need because of strange structure of schedule
+        data = soup.find('div', class_ = 'row')
+        # print(data)
+        divs = data.find_all('tbody') 
 
-    counter = 1
+        # Counter need because of strange structure of schedule
 
-    for i in divs:
+        counter = 1
 
-        # On the site schedule have 2 similar versions
-        # which plased in the same table
+        for i in divs:
 
-        # We need only 1 wersion, so we take only
-        # odd version
+            # On the site schedule have 2 similar versions
+            # which plased in the same table
 
-        if counter % 2:
+            # We need only 1 wersion, so we take only
+            # odd version
 
-            day = i.find_all('tr')
-            
-            counter1 = 0
+            if not counter % 2:
 
-            for j in day:
+                day = i.find_all('tr')
+                
+                counter1 = 0
 
-                day_schedule = SC.DaySchedule()
+                for j in day:
 
-                data_of_day = j.find_all('td')
+                    # day_schedule = SC.DaySchedule()
 
-                if counter1 == 0:
+                    data_of_day = j.find_all('td')
 
-                    day_of_week = j.td.text
+                    if counter1 == 0:
 
-        ###----------------------
-                    # day_schedule.get_new_val_for_day_of_week(day_of_week + '\n')
+                        day_of_week = j.td.text
 
-                elif counter1 == 1:
-                    pass
+                        f.write(day_of_week + '\n')
 
-                else:
-                    
-                    time_of_lesson = data_of_day[0].text
+            ###----------------------
+                        # day_schedule.get_new_val_for_day_of_week(day_of_week + '\n')
 
-        ###-----------------------
-                    # day_schedule.time_of_classes[counter1 - 2] = time_of_lesson + '\n'
-
-                    if 'colspan=' not in str(data_of_day):
-
-                        # Тогда у нас 3 поля td
-                        
-                        odd_lesson = data_of_day[1].text
-
-                        if odd_lesson == '':
-                            odd_lesson = '---'
-
-                        even_lesson = data_of_day[2].text
-
-                        if even_lesson == '':
-                            even_lesson = '---'
-
-        ###-----------------------
-                        # day_schedule.classes[counter1 - 2] = '  (чс) ' + odd_lesson + '\n   (зн) ' + even_lesson + '\n'
-
+                    elif counter1 == 1:
+                        pass
 
                     else:
+                        
+                        time_of_lesson = data_of_day[0].text
 
-                        odd_lesson = even_lesson = data_of_day[1].text
+                        f.write(time_of_lesson + '\n')
 
-        ###-----------------------
-                        # day_schedule.classes[counter1 - 2] = '  ' + data_of_day[1].text + '\n'
+            ###-----------------------
+                        # day_schedule.time_of_classes[counter1 - 2] = time_of_lesson + '\n'
 
-                print(data_of_day)
-                
-                # print(
-                # day_schedule.return_day_of_week(),
-                # day_schedule.time_of_classes[counter1 - 2],
-                # day_schedule.classes[counter1 - 2],
-                # )
+                        if 'colspan=' not in str(data_of_day):
 
-                week.append(day_schedule)
-                counter1 += 1
+                            # Тогда у нас 3 поля td
+                            
+                            odd_lesson = data_of_day[1].text
 
-            print('********************************')
-            week.append(day_of_week)
+                            if odd_lesson == '':
+                                odd_lesson = '---'
 
-        counter +=1
+                            even_lesson = data_of_day[2].text
+
+                            if even_lesson == '':
+                                even_lesson = '---'
+
+                            f.write(
+                                    '(чс) ' + odd_lesson + '\n'
+                                    + '(зн) '+ even_lesson+ '\n\n'
+                                    )
+
+            ###-----------------------
+                            # day_schedule.classes[counter1 - 2] = '  (чс) ' + odd_lesson + '\n   (зн) ' + even_lesson + '\n'
+
+
+                        else:
+
+                            odd_lesson = even_lesson = data_of_day[1].text
+
+                            f.write(even_lesson+ '\n\n')
+
+            ###-----------------------
+                            # day_schedule.classes[counter1 - 2] = '  ' + data_of_day[1].text + '\n'
+
+                    # print(data_of_day)
+                    
+                    # print(
+                    # day_schedule.return_day_of_week(),
+                    # day_schedule.time_of_classes[counter1 - 2],
+                    # day_schedule.classes[counter1 - 2],
+                    # )
+
+                    # week.append(day_schedule)
+
+                    counter1 += 1
+
+                f.write('********************************\n')
+
+            counter +=1
 
 
 
